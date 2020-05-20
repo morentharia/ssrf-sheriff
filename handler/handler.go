@@ -11,7 +11,14 @@ import (
 	"path/filepath"
 
 	"github.com/gorilla/mux"
-	"github.com/teknogeek/ssrf-sheriff/httpserver"
+	"github.com/morentharia/ssrf-sheriff/colorjson"
+	"github.com/morentharia/ssrf-sheriff/httpserver"
+	"github.com/slack-go/slack"
+
+	// "github.com/rs/zerolog/log"
+
+	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"go.uber.org/config"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
@@ -25,8 +32,10 @@ type SerializableResponse struct {
 
 // SSRFSheriffRouter is a wrapper around mux.Router to handle HTTP requests to the sheriff, with logging
 type SSRFSheriffRouter struct {
-	logger    *zap.Logger
-	ssrfToken string
+	logger      *zap.Logger
+	ssrfToken   string
+	slackClient *slack.Client
+	cfg         config.Provider
 }
 
 // NewHTTPServer provides a new HTTP server listener
@@ -34,7 +43,6 @@ func NewHTTPServer(
 	mux *mux.Router,
 	cfg config.Provider,
 ) *http.Server {
-
 	return &http.Server{
 		Addr:    cfg.Get("http.address").String(),
 		Handler: mux,
@@ -44,12 +52,20 @@ func NewHTTPServer(
 // NewSSRFSheriffRouter returns a new SSRFSheriffRouter which is used to route and handle all HTTP requests
 func NewSSRFSheriffRouter(
 	logger *zap.Logger,
+	slackClient *slack.Client,
 	cfg config.Provider,
 ) *SSRFSheriffRouter {
 	return &SSRFSheriffRouter{
-		logger:    logger,
-		ssrfToken: cfg.Get("ssrf_token").String(),
+		logger:      logger,
+		ssrfToken:   cfg.Get("ssrf_token").String(),
+		slackClient: slackClient,
+		cfg:         cfg,
 	}
+}
+
+func NewSlackClient(cfg config.Provider) (*slack.Client, error) {
+	api := slack.New(cfg.Get("slack.token").String())
+	return api, nil
 }
 
 // StartServer starts the HTTP server
@@ -102,12 +118,26 @@ func (s *SSRFSheriffRouter) PathHandler(w http.ResponseWriter, r *http.Request) 
 		contentType = "text/plain"
 	}
 
-	s.logger.Info("New inbound HTTP request",
-		zap.String("IP", r.RemoteAddr),
-		zap.String("Path", r.URL.Path),
-		zap.String("Response Content-Type", contentType),
-		zap.Any("Request Headers", r.Header),
+	log.Infof("New inbound HTTP request %s", colorjson.Marshal(map[string]interface{}{
+		"IP":                    r.RemoteAddr,
+		"Path":                  r.URL.Path,
+		"Response Content-Type": contentType,
+		"Headers":               r.Header,
+	}))
+
+	jsonBody, _ := json.Marshal(map[string]interface{}{
+		"IP":                    r.RemoteAddr,
+		"Path":                  r.URL.Path,
+		"Response Content-Type": contentType,
+		"Headers":               r.Header,
+	})
+	channelID, _, err := s.slackClient.PostMessage(
+		s.cfg.Get("slack.channel_id").String(),
+		slack.MsgOptionText(string(jsonBody), false),
 	)
+	if err != nil {
+		logrus.WithError(err).WithField("channelID", channelID).Error("slack send message")
+	}
 
 	responseBytes := []byte(response)
 	w.Header().Set("Content-Type", contentType)
@@ -138,10 +168,12 @@ func NewConfigProvider() (config.Provider, error) {
 
 // NewLogger returns a new *zap.Logger
 func NewLogger() (*zap.Logger, error) {
-	zapConfig := zap.NewProductionConfig()
+	// zapConfig := zap.NewProductionConfig()
+	zapConfig := zap.NewDevelopmentConfig()
 	zapConfig.Encoding = "console"
 	zapConfig.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	zapConfig.DisableStacktrace = true
+	zapConfig.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	zapConfig.DisableStacktrace = false
 
 	return zapConfig.Build()
 }

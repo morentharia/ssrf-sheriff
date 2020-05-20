@@ -1,0 +1,53 @@
+# github.com/TylerBrock/colorjson v0.0.0-20180527164720-95ec53f28296
+github.com/TylerBrock/colorjson
+# github.com/fatih/color v1.9.0
+github.com/fatih/color
+# github.com/gorilla/mux v1.7.4
+github.com/gorilla/mux
+# github.com/konsorten/go-windows-terminal-sequences v1.0.3
+github.com/konsorten/go-windows-terminal-sequences
+# github.com/mattn/go-colorable v0.1.6
+github.com/mattn/go-colorable
+# github.com/mattn/go-isatty v0.0.12
+github.com/mattn/go-isatty
+# github.com/sirupsen/logrus v1.6.0
+github.com/sirupsen/logrus
+# github.com/yudai/pp v2.0.1+incompatible
+github.com/yudai/pp
+# go.uber.org/atomic v1.6.0
+go.uber.org/atomic
+# go.uber.org/config v1.4.0
+go.uber.org/config
+go.uber.org/config/internal/merge
+go.uber.org/config/internal/unreachable
+# go.uber.org/dig v1.9.0
+go.uber.org/dig
+go.uber.org/dig/internal/digreflect
+go.uber.org/dig/internal/dot
+# go.uber.org/fx v1.12.0
+go.uber.org/fx
+go.uber.org/fx/internal/fxlog
+go.uber.org/fx/internal/fxreflect
+go.uber.org/fx/internal/lifecycle
+# go.uber.org/multierr v1.5.0
+go.uber.org/multierr
+# go.uber.org/zap v1.15.0
+go.uber.org/zap
+go.uber.org/zap/buffer
+go.uber.org/zap/internal/bufferpool
+go.uber.org/zap/internal/color
+go.uber.org/zap/internal/exit
+go.uber.org/zap/zapcore
+# golang.org/x/lint v0.0.0-20190930215403-16217165b5de
+golang.org/x/lint
+golang.org/x/lint/golint
+# golang.org/x/sys v0.0.0-20200223170610-d5e6a3e2c0ae
+golang.org/x/sys/unix
+# golang.org/x/text v0.3.2
+golang.org/x/text/transform
+# golang.org/x/tools v0.0.0-20191114200427-caa0b0f7d508
+golang.org/x/tools/go/ast/astutil
+golang.org/x/tools/go/gcexportdata
+golang.org/x/tools/go/internal/gcimporter
+# gopkg.in/yaml.v2 v2.2.5
+gopkg.in/yaml.v2

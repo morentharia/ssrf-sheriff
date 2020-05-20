@@ -2,3 +2,6 @@ http:
   address: ":8000"
 
 ssrf_token: "REPLACE_THIS_WITH_YOUR_SECRET_VALUE"
+slack:
+  token: "xoxb-Bot User OAuth Access Token"
+  channel_id: "C013377M37"
